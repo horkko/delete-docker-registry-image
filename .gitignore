@@ -3,3 +3,5 @@
 Gemfile*
 Guardfile
 aliases.sh
+.idea
+.Python

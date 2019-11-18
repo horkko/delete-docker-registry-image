@@ -338,6 +338,10 @@ class RegistryCleaner(object):
 def main():
     """cli entrypoint"""
     parser = argparse.ArgumentParser(description="Cleanup docker registry")
+    parser.add_argument("-d", "--data-dir",
+                        dest="datadir",
+                        default="/opt/registry_data/docker/registry/v2",
+                        help="Path to registry data dir (default %(default)s)")
     parser.add_argument("-i", "--image",
                         dest="image",
                         required=True,
@@ -364,7 +368,6 @@ def main():
                         help="Delete all untagged blobs for image")
     args = parser.parse_args()
 
-
     handler = logging.StreamHandler()
     handler.setFormatter(logging.Formatter(u'%(levelname)-8s [%(asctime)s]  %(message)s'))
     logger.addHandler(handler)
@@ -375,10 +378,12 @@ def main():
         logger.setLevel(logging.INFO)
 
 
-    # make sure not to log before logging is setup. that'll hose your logging config.
+    # make sure not to log before logging is setup.
+    # That'll hose your logging config.
     if args.force:
-        logger.info(
-            "You supplied the force switch, which is deprecated. It has no effect now, and the script defaults to doing what used to be only happen when force was true")
+        logger.info("You supplied the force switch, which is deprecated. "
+                    "It has no effect now, and the script defaults to doing "
+                    "what used to be only happen when force was true")
 
     splitted = args.image.split(":")
     if len(splitted) == 2:
@@ -391,8 +396,7 @@ def main():
     if 'REGISTRY_DATA_DIR' in os.environ:
         registry_data_dir = os.environ['REGISTRY_DATA_DIR']
     else:
-        registry_data_dir = "/opt/registry_data/docker/registry/v2"
-
+        registry_data_dir = args.datadir
     try:
         cleaner = RegistryCleaner(registry_data_dir, dry_run=args.dry_run)
         if args.untagged:
